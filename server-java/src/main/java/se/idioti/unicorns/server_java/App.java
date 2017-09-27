@@ -8,6 +8,7 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 import static spark.Spark.staticFiles;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,14 +47,24 @@ public class App  {
 		 * Add new unicorn
 		 */
 		post(prefix + "/unicorns", (req, res) -> {
-			List<Unicorn> unicorns = storage.fetchUnicorns();
-			String output = "";
-			
-			for (Unicorn unicorn : unicorns) {
-				output += unicorn.name + "\n";
+			Unicorn unicorn = null;
+			try {
+				unicorn = objectMapper.readValue(req.bodyAsBytes(), Unicorn.class);
+			} catch (Exception e) {
+				res.status(400);
+				return "";
 			}
 			
-			return output;
+			if (storage.addUnicorn(unicorn)) {
+				// The unicorn was added. Yay!
+				res.status(201);
+				res.type("application/json");
+				return objectMapper.writeValueAsString(unicorn);
+			} else {
+				// The unicorn was never added. Not good.
+				res.status(500);
+				return "";
+			}
 		});
 		
 		/*
@@ -74,10 +85,23 @@ public class App  {
 		 * Update a unicorn
 		 */
 		put(prefix + "/unicorns/:id", (req, res) -> {
-			int id = Integer.parseInt(req.params(":id"));
-			Unicorn unicorn = storage.fetchUnicorn(id);
+			Unicorn unicorn = null;
+			try {
+				unicorn = objectMapper.readValue(req.bodyAsBytes(), Unicorn.class);
+				unicorn.id = Integer.parseInt(req.params(":id"));
+			} catch (Exception e) {
+				res.status(400);
+				return "";
+			}
 			
-			return unicorn.name;
+			if (storage.updateUnicorn(unicorn)) {
+				res.status(204);
+				return "";
+			} else {
+				// The unicorn wasn't updated. Not good.
+				res.status(404);
+				return "";
+			}
 		});
 		
 		/*
@@ -85,9 +109,15 @@ public class App  {
 		 */
 		delete(prefix + "/unicorns/:id", (req, res) -> {
 			int id = Integer.parseInt(req.params(":id"));
-			Unicorn unicorn = storage.fetchUnicorn(id);
 			
-			return unicorn.name;
+			if (storage.deleteUnicorn(id)) {
+				res.status(204);
+				return "";
+			} else {
+				// The unicorn wasn't deleted. Not good.
+				res.status(500);
+				return "";
+			}
 		});
 		
 		// The HTML representations below

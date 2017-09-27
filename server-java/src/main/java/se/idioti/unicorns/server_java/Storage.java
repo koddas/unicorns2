@@ -140,8 +140,11 @@ public class Storage {
 	 * Adds a new unicorn.
 	 * 
 	 * @param unicorn A new unicorn object.
+	 * @return Returns true if the unicorn was added.
+	 * @throws SQLException 
 	 */
-	public void addUnicorn(Unicorn unicorn) {
+	public boolean addUnicorn(Unicorn unicorn) {
+		boolean added = false;
 		try {
 			connection.setAutoCommit(false); // This is because SQLite isn't complete...
 			Statement statement = connection.createStatement();
@@ -164,6 +167,7 @@ public class Storage {
 			ResultSet generatedKeys = statement.executeQuery("SELECT last_insert_rowid()");
 			if (generatedKeys.next()) {
 				unicorn.id = generatedKeys.getInt(1);
+				added = true;
 			}
 			
 		} catch (SQLException e) {
@@ -171,54 +175,68 @@ public class Storage {
 		} finally {
 			try {
 				connection.setAutoCommit(true);
-			} catch (SQLException e) {
-				e.printStackTrace();
+			} catch (SQLException e2) {
+				e2.printStackTrace();
 			}
 		}
+		
+		return added;
 	}
 	
 	/**
 	 * Updates an existing unicorn.
 	 * 
 	 * @param unicorn A unicorn object.
+	 * @return Returns true if the unicorn was updated.
+	 * @throws SQLException 
 	 */
-	public void updateUnicorn(Unicorn unicorn) {
+	public boolean updateUnicorn(Unicorn unicorn){
+		boolean updated = false;
+		
 		try {
 			Statement statement = connection.createStatement();
-			
+
 			String sql = "UPDATE unicorns SET id = " + unicorn.id + ", "
-					   + "name = '" + unicorn.name + "', "
-					   + "description = '" + unicorn.description + "', "
-					   + "reportedBy = '" + unicorn.reportedBy + "', "
-					   + "location = '" + unicorn.spottedWhere.name + "', "
-					   + "lat = " + unicorn.spottedWhere.lat + ", "
-					   + "lon = " + unicorn.spottedWhere.lon + ", "
-					   + "spottedWhen = '" + unicorn.spottedWhen.toString() + "', "
-					   + "image = '" + unicorn.image + "' "
-					   + "WHERE id = " + unicorn.id + ";";
-			
-			statement.executeUpdate(sql);
-			
+					+ "name = '" + unicorn.name + "', "
+					+ "description = '" + unicorn.description + "', "
+					+ "reportedBy = '" + unicorn.reportedBy + "', "
+					+ "location = '" + unicorn.spottedWhere.name + "', "
+					+ "lat = " + unicorn.spottedWhere.lat + ", "
+					+ "lon = " + unicorn.spottedWhere.lon + ", "
+					+ "spottedWhen = '" + unicorn.spottedWhen.toString() + "', "
+					+ "image = '" + unicorn.image + "' "
+					+ "WHERE id = " + unicorn.id + ";";
+
+			updated = statement.executeUpdate(sql) > 0;
+
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return updated;
 	}
 	
 	/**
 	 * Deletes a unicorn from the database.
 	 * 
 	 * @param id The id of a unicorn
+	 * @return Returns true if the unicorn was deleted.
+	 * @throws SQLException 
 	 */
-	public void deleteUnicorn(int id) {
+	public boolean deleteUnicorn(int id) {
+		boolean deleted = false;
+		
 		try {
 			Statement statement = connection.createStatement();
-			
-			statement.executeUpdate("DELETE FROM unicorns WHERE id = " + id);
-			
+	
+			deleted = statement.executeUpdate("DELETE FROM unicorns WHERE id = " + id) > 0;
+	
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return deleted;
 	}
 }
