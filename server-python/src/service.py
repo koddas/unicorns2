@@ -80,9 +80,8 @@ def update_unicorn(unicorn):
     json_data = request.get_json()
     unicorn = Unicorn()
     unicorn.fromJSON(json_data)
-    unicorn = storage.add_unicorn(unicorn)
     
-    if unicorn.id > 0:
+    if storage.update_unicorn(unicorn):
         # 204, unicorn updated
         return '', 204
     else:

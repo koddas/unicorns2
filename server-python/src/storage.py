@@ -86,18 +86,25 @@ def update_unicorn(unicorn):
     '''
     Updates a unicorn. The parameter is a Unicorn object.
     '''
+    flattened_unicorn = unicorn.toDict()
+    flattened_unicorn['location'] = flattened_unicorn['spottedWhere']['name']
+    flattened_unicorn['lat'] = flattened_unicorn['spottedWhere']['lat']
+    flattened_unicorn['lon'] = flattened_unicorn['spottedWhere']['lon']
+    print(flattened_unicorn)
     
     conn = sqlite3.connect('unicorns.db')
     c = conn.cursor()
     
     c.execute("UPDATE unicorns SET id=:id, name=:name, description=:description, " +
-              "reportedBy=:reportedBy, location=:spottedWhereName, " +
-              "lat=:spottedWhereLat, lon=:spottedWhereLon, " +
+              "reportedBy=:reportedBy, location=:location, lat=:lat, lon=:lon, " +
               "spottedWhen=:spottedWhen, image=:image WHERE id=:id",
-              unicorn.toDict())
+              flattened_unicorn)
+    updated = c.rowcount > 0
     
     conn.commit()
     conn.close()
+    
+    return updated
 
 def delete_unicorn(unicorn_id):
     '''
@@ -105,6 +112,12 @@ def delete_unicorn(unicorn_id):
     '''
     
     conn = sqlite3.connect('unicorns.db')
-    conn.execute("DELETE FROM unicorns WHERE id=?", (unicorn_id, ))
+    c = conn.cursor()
+
+    c.execute("DELETE FROM unicorns WHERE id=?", (unicorn_id, ))
+    deleted = c.rowcount > 0
+    
     conn.commit()
     conn.close()
+    
+    return deleted
