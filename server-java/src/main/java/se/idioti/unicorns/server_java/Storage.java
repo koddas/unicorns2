@@ -143,6 +143,7 @@ public class Storage {
 	 */
 	public void addUnicorn(Unicorn unicorn) {
 		try {
+			connection.setAutoCommit(false); // This is because SQLite isn't complete...
 			Statement statement = connection.createStatement();
 			
 			String sql = "INSERT INTO unicorns (name, description, reportedBy, "
@@ -157,10 +158,22 @@ public class Storage {
 					   + "'" + unicorn.image + "');";
 			
 			statement.executeUpdate(sql);
-			
 			statement.close();
+			
+			// This is because SQLite isn't complete...
+			ResultSet generatedKeys = statement.executeQuery("SELECT last_insert_rowid()");
+			if (generatedKeys.next()) {
+				unicorn.id = generatedKeys.getInt(1);
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				connection.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
