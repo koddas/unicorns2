@@ -41,7 +41,9 @@ def list_unicorns():
     unicorns = storage.fetch_unicorns()
     unicorn_list = []
     for unicorn in unicorns:
-       unicorn_list.append(unicorn.toDict())
+       unicorn_dict = unicorn.toDict()
+       unicorn_dict['details'] = prefix + '/unicorns/' + str(unicorn.id)
+       unicorn_list.append(unicorn_dict)
     return jsonify(unicorn_list)
 
 def add_unicorn():
