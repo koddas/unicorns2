@@ -2,13 +2,11 @@ package se.idioti.unicorns.server_java;
 
 import static spark.Spark.delete;
 import static spark.Spark.get;
-import static spark.Spark.notFound;
 import static spark.Spark.port;
 import static spark.Spark.post;
 import static spark.Spark.put;
 import static spark.Spark.staticFiles;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
