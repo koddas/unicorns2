@@ -1,4 +1,6 @@
 /target/
 /.settings/
+
+unicorns.db
 .classpath
 .project
