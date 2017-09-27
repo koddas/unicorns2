@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, jsonify, make_response, render_template, request
+from flask import Flask, abort, jsonify, make_response, render_template, request
 from unicorns.Unicorn import Unicorn
 import storage
 
 app = Flask(__name__)
 prefix = '/api/v1'
+
+# The API definition
 
 @app.route(prefix + '/unicorns', methods=['GET', 'POST'])
 def unicorn_collection():
@@ -31,11 +33,21 @@ def unicorn_resources(unicorn):
 @app.route('/unicorns')
 def unicorn_collection_html():
     unicorns = storage.fetch_unicorns()
+    return render_template('list.tpl', unicorns=unicorns)
 
-@app.route('/unicorns/<int:unicorn>')
-def unicorn_resources_html(unicorn):
-    pass
+@app.route('/unicorns/<int:unicorn_id>')
+def unicorn_resources_html(unicorn_id):
+    unicorn = storage.fetch_unicorn(unicorn_id);
+    if unicorn is not None:
+        return render_template('details.tpl', unicorn=unicorn)
+    else:
+        abort(404)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.tpl'), 404
+
+# Helper functions
 
 def list_unicorns():
     unicorns = storage.fetch_unicorns()
