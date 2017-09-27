@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, make_response, request
+from flask import Flask, jsonify, make_response, render_template, request
 from unicorns.Unicorn import Unicorn
-import json
 import storage
 
 app = Flask(__name__)
@@ -29,14 +28,21 @@ def unicorn_resources(unicorn):
         # Remove a unicorn
         return delete_unicorn(unicorn)
 
+@app.route('/unicorns')
+def unicorn_collection_html():
+    unicorns = storage.fetch_unicorns()
+
+@app.route('/unicorns/<int:unicorn>')
+def unicorn_resources_html(unicorn):
+    pass
+
+
 def list_unicorns():
     unicorns = storage.fetch_unicorns()
     unicorn_list = []
     for unicorn in unicorns:
        unicorn_list.append(unicorn.toDict())
-    resp = make_response(json.dumps(unicorn_list, ensure_ascii = False))
-    resp.headers['Content-Type'] = 'application/json; charset=utf8'
-    return resp
+    return jsonify(unicorn_list)
 
 def add_unicorn():
     json_data = request.get_json()
@@ -46,9 +52,7 @@ def add_unicorn():
     
     if unicorn.id > 0:
         # 201, unicorn added
-        resp = make_response(json.dumps(unicorn.toDict(), ensure_ascii = False), 201)
-        resp.headers['Content-Type'] = 'application/json; charset=utf8'
-        return resp
+        return make_response(jsonify(unicorn.toDict()), 201)
     else:
         # 400, couldn't add unicorn
         return '', 400
@@ -56,11 +60,9 @@ def add_unicorn():
 def get_unicorn(unicorn_id):
     unicorn = storage.fetch_unicorn(unicorn_id);
     if unicorn is not None:
-        resp = make_response(json.dumps(unicorn.toDict(), ensure_ascii = False))
-        resp.headers['Content-Type'] = 'application/json; charset=utf8'
+        return jsonify(unicorn.toDict())
     else:
-        resp = make_response('', 404)
-    return resp
+        return '', 404
 
 def update_unicorn(unicorn):
     json_data = request.get_json()
