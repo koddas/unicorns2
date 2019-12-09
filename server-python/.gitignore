@@ -1,5 +1,9 @@
 venv/
 src/__pycache__/
 src/unicorns.db
+/.settings/
+.classpath
+.project
+.pydevproject
 
 *.pyc
